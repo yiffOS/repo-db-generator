@@ -1,14 +1,11 @@
 use std::fs::File;
-use std::hash::Hash;
-use std::io::{Cursor, Read, Write};
-use std::path::Path;
-use std::process::exit;
+use std::io::{Read, Write};
+
+use data_encoding::HEXLOWER;
 use ring::digest::{Context, SHA512};
-use serde_derive::Deserialize;
 use rusqlite::{Connection, params};
-use toml::Value::Float;
+use serde_derive::Deserialize;
 use walkdir::{DirEntry, WalkDir};
-use data_encoding::HEXUPPER;
 
 #[derive(Deserialize)]
 struct Config {
@@ -170,11 +167,12 @@ fn main() {
     }
 
     let hash = context.finish();
+    let hash_string = HEXLOWER.encode(hash.as_ref()).to_lowercase();
 
-    println!("=> Hash: {}", HEXUPPER.encode(hash.as_ref()));
+    println!("=> Hash: {}", &hash_string);
 
     let mut database_hash_file = File::create("database.hash").expect("Failed to create database.hash! Aborting...");
-    database_hash_file.write_all(HEXUPPER.encode(hash.as_ref()).as_bytes()).expect("Failed to write to database.hash! Aborting...");
+    database_hash_file.write_all(hash_string.as_ref()).expect("Failed to write to database.hash! Aborting...");
     println!("=> Hash File Created!");
     println!("=== Hash Generated! ===");
 
