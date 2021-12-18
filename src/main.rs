@@ -89,7 +89,6 @@ fn main() {
                 url              text,
                 license          text,
                 depends          text,
-                build_depends    text,
                 optional_depends text,
                 provides         text,
                 conflicts        text,
@@ -123,13 +122,12 @@ fn main() {
                         url,
                         license,
                         depends,
-                        build_depends,
                         optional_depends,
                         provides,
                         conflicts,
                         replaces,
                         checksum
-                    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14);
+                    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13);
             ",
             params![
                 &package_info.name,
@@ -140,7 +138,6 @@ fn main() {
                 &package_info.url,
                 vec_to_string(&package_info.license),
                 vec_to_string(&package_info.depends),
-                vec_to_string(&package_info.make_depends),
                 vec_to_string(&package_info.optional_depends),
                 vec_to_string(&package_info.provides),
                 vec_to_string(&package_info.conflicts),
