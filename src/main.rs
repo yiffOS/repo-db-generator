@@ -101,6 +101,7 @@ fn main() {
     println!("=== Database Created! ===");
 
     println!("=== Populating Database ===");
+    let mut flat_db: String = String::new();
     for entry in WalkDir::new("packages/").into_iter()
         .filter_entry(|e| !is_hidden(e))
         .filter_map(|e| e.ok()) {
@@ -145,8 +146,13 @@ fn main() {
                 ""
             ]
             ).expect("Failed to insert package into database! Aborting...");
+
+            flat_db.push_str(&format!("{}{}", &package_info.name, "\n"));
         }
     }
+    File::create("database.flat").expect("Failed to create flat db")
+        .write_all(flat_db.as_ref()).expect("Failed to write flat db");
+
     println!("=== Database Populated! ===");
 
     println!("=== Generating Hash ===");
