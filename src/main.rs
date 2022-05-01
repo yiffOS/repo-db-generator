@@ -74,7 +74,7 @@ fn main() {
 
     // Create the initial sqlite database with rust-sqlite
     println!("=== Creating Database ===");
-    let db = Connection::open("database.db").expect("Failed to create database! Aborting...");
+    let mut db = Connection::open("database.db").expect("Failed to create database! Aborting...");
 
     db.execute(
         "create table if not exists packages
@@ -101,6 +101,8 @@ fn main() {
     println!("=== Database Created! ===");
 
     println!("=== Populating Database ===");
+    let tx = db.transaction().expect("Failed to creation a transaction!");
+
     let mut flat_db: String = String::new();
     for entry in WalkDir::new("packages/").into_iter()
         .filter_entry(|e| !is_hidden(e))
@@ -112,7 +114,7 @@ fn main() {
 
             println!("=> Inserting: {} v{}-{}", &package_info.name, &package_info.version, &package_info.epoch);
 
-            db.execute("
+            tx.execute("
                 INSERT OR REPLACE INTO packages
                     (
                         name,
@@ -150,6 +152,9 @@ fn main() {
             flat_db.push_str(&format!("{}{}", &package_info.name, "\n"));
         }
     }
+
+    tx.commit().expect("Failed to commit transaction!");
+    
     File::create("database.flat").expect("Failed to create flat db")
         .write_all(flat_db.as_ref()).expect("Failed to write flat db");
 
